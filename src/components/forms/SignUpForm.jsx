@@ -1,44 +1,47 @@
-"use client"
+"use client";
 
-import { set, useForm } from "react-hook-form"
-import { useState } from "react"
+import { useForm } from "react-hook-form";
+import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { hasLowerCase, hasNoSpaces, hasNumber, hasUpperCase, hasSpecialChar } from "@/util/validators/validators";
 import { useUser } from "@/context/UserContext";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 const SignUpForm = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, handleSubmit, formState: { errors }, watch } = useForm();
     const router = useRouter();
     const [error, setError] = useState(null);
-    const { setUser } = useUser();
+    const { saveUser } = useUser();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const toCapitalize = (text) => {
-        return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
-    }
+    const toCapitalize = (text) => text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
 
     const onSubmit = async (data) => {
+        setError(null); 
         try {
-            const dataModified = {
-                ...data, "imageUrl": null,
-                "biography": null,
-                "fullname": toCapitalize(data.fullname),
-                "username": data.username.toLowerCase()
+            const { confirmPassword, ...dataWithoutConfirmPassword } = data;
+            const userData = {
+                ...dataWithoutConfirmPassword,
+                imageUrl: null,
+                biography: null,
+                fullname: toCapitalize(data.fullname),
+                username: data.username.toLowerCase()
             };
-            console.log(dataModified);
-            const respuesta = await axios.post("http://localhost:8080/auth/register", dataModified, { withCredentials: true })
 
-            if (respuesta.status === 200) {
+            const response = await axios.post("http://localhost:8080/auth/register", userData, { withCredentials: true });
+
+            if (response.status === 200) {
                 console.log("Usuario registrado correctamente");
-                setUser(dataModified);
+                saveUser(userData);
                 router.push("/home");
             } else {
                 setError("Error registering user");
             }
-        } catch (error) {
-            setError("Error registering user");
+        } catch (err) {
+            setError(err.response?.data?.message || "Error registering user");
         }
-
     };
 
     return (
@@ -154,31 +157,66 @@ const SignUpForm = () => {
                 {errors.birthday && <p className="text-red-500 text-sm">{errors.birthday.message}</p>}
             </div>
 
-            <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {/* Password */}
+            <div className="relative">
+                <label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Password
                 </label>
-                <input
-                    id="password"
-                    type="password"
-                    {...register("password",
-                        {
+                <div className="relative">
+                    <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        {...register("password", {
                             required: "Password is required",
-                            minLength: { value: 8, message: "Password must have at least 8 characters" },
-                            maxLength: { value: 12, message: "Password must have at most 20 characters" },
+                            minLength: { value: 8, message: "At least 8 characters" },
+                            maxLength: { value: 20, message: "At most 20 characters" },
                             validate: (value) => {
-                                if (!hasUpperCase(value)) return "Password must have at least one uppercase character";
-                                if (!hasLowerCase(value)) return "Password must have at least one lowercase character";
-                                if (!hasNumber(value)) return "Password must have at least one number";
-                                if (!hasSpecialChar(value)) return "Password must have at least one special character";
-                                if (!hasNoSpaces(value)) return "Password must not have spaces";
+                                if (!hasUpperCase(value)) return "Must have an uppercase letter";
+                                if (!hasLowerCase(value)) return "Must have a lowercase letter";
+                                if (!hasNumber(value)) return "Must have a number";
+                                if (!hasSpecialChar(value)) return "Must have a special character";
+                                if (!hasNoSpaces(value)) return "Must not contain spaces";
                                 return true;
-                            }
-                        }
-                    )}
-                    className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                />
-                {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+                            },
+                        })}
+                        className="w-full p-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-gray-700 dark:text-white"
+                    />
+                    <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                        {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+                    </button>
+                </div>
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="relative">
+                <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Confirm Password
+                </label>
+                <div className="relative">
+                    <input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        {...register("confirmPassword", {
+                            required: "Please confirm your password",
+                            validate: (value) =>
+                                value === watch("password") || "Passwords do not match",
+                        })}
+                        className="w-full p-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all dark:bg-gray-700 dark:text-white"
+                    />
+                    <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                        onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    >
+                        {showConfirmPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+                    </button>
+                </div>
+                {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
             </div>
 
             <button

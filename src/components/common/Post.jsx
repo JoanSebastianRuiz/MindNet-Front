@@ -8,11 +8,13 @@ import { useUser } from "@/context/UserContext";
 import ReactModal from "react-modal";
 import PostEditForm from "@/components/modals/PostEditForm";
 import CommentForm from "@/components/forms/CommentForm";
+import { useRouter } from "next/navigation";
 
 const Post = ({ post }) => {
   const [comments, setComments] = useState(null);
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -55,7 +57,10 @@ const Post = ({ post }) => {
           <UserIcon className="w-12 h-12 text-gray-400 bg-gray-200 rounded-full p-2" />
         )}
         <div>
-          <h1 className="text-lg font-semibold">{post.fullname}</h1>
+          <button
+            onClick={() => router.push(`/profile/${post.username}`)}>
+            <h1 className="text-lg font-semibold">{post.fullname}</h1>
+          </button>
           <p className="text-sm text-gray-500">@{post.username}</p>
         </div>
       </div>

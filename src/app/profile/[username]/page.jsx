@@ -3,7 +3,7 @@
 import Container from "@/components/containers/Container";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { User, UserRoundCheck, UserRoundPlus, UserRoundMinus, Pencil, Mail, Phone, Calendar } from "lucide-react";
+import { User, UserRoundCheck, UserRoundPlus, UserRoundMinus, Pencil, Mail, Phone, Calendar, CircleX } from "lucide-react";
 import axios from "axios";
 import Post from "@/components/common/Post";
 import ReactModal from "react-modal";
@@ -22,47 +22,38 @@ const Profile = () => {
   const [isHoveringUnfollow, setIsHoveringUnfollow] = useState(false);
   const { user: currentUser } = useUser();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const { data } = await axios.get(`http://localhost:8080/api/users/username/${username}`, { withCredentials: true });
-        setUser(data);
-      } catch (error) {
-        console.error("Error getting user", error);
-      }
-    };
-
-    const fetchPosts = async () => {
-      try {
-        const { data } = await axios.get(`http://localhost:8080/api/posts/user/${username}`, { withCredentials: true });
-        setPosts(data);
-      } catch (error) {
-        console.error("Error getting posts", error);
-      }
-    };
-
-    fetchUser();
-    fetchPosts();
-  }, [username]);
-
-  useEffect(() => {
-    if (currentUser.id !== user?.id && currentUser.following.some((u) => u.username === user?.username)) {
-      setUserFollow(true);
-    } else {
-      setUserFollow(false);
+  const fetchUser = async () => {
+    try {
+      const { data } = await axios.get(`http://localhost:8080/api/users/username/${username}`, { withCredentials: true });
+      setUser(data);
+    } catch (error) {
+      console.error("Error getting user", error);
     }
-  }, [user]);
+  };
 
-  if (!user) return <p className="text-center text-gray-500">Loading profile...</p>;
+  const fetchPosts = async () => {
+    try {
+      const { data } = await axios.get(`http://localhost:8080/api/posts/user/${username}`, { withCredentials: true });
+      setPosts(data);
+    } catch (error) {
+      console.error("Error getting posts", error);
+    }
+  };
+
+  const refreshUser =  async () => {
+    await fetchPosts();
+    await fetchUser();
+  };
 
   const handleFollow = async () => {
     try {
       const data = {
         username: currentUser.username,
         usernameFollowed: user.username
-      }
+      };
       await axios.post(`http://localhost:8080/api/users/follow`, data, { withCredentials: true });
       setUserFollow(true);
+      refreshUser();
     } catch (error) {
       console.error("Error following user", error);
     }
@@ -73,13 +64,40 @@ const Profile = () => {
       const data = {
         username: currentUser.username,
         usernameUnfollowed: user.username
-      }
-      await axios.post(`http://localhost:8080/api/users/unfollow`, data, { withCredentials: true });
+      };
+      await axios.delete(`http://localhost:8080/api/users/unfollow`, {
+        data: data, // Debe ir dentro del objeto de configuración
+        withCredentials: true
+      });
       setUserFollow(false);
+      refreshUser();
     } catch (error) {
       console.error("Error unfollowing user", error);
     }
   };
+
+  useEffect(() => {
+    fetchUser();
+    fetchPosts();
+  }, [username]);
+
+  useEffect(() => {
+    if (!currentUser || !user) return;
+
+    if (
+      currentUser.id !== user.id &&
+      Array.isArray(user.followers) &&
+      user.followers.some((u) => u.username === currentUser.username)
+    ) {
+      setUserFollow(true);
+    } else {
+      console.log(user);
+      setUserFollow(false);
+    }
+  }, [user, currentUser]);
+
+  if (!user) return <p className="text-center text-gray-500">Loading profile...</p>;
+  if (!currentUser) return <p className="text-center text-gray-500">Loading profile...</p>;
 
   return (
     <Container>
@@ -111,7 +129,8 @@ const Profile = () => {
 
             {/* Botón de seguir o editar perfil */}
             {currentUser.id === user.id ? (
-              <button className="flex items-center space-x-2 py-2 px-4 rounded-lg font-semibold transition-all bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600">
+              <button className="flex items-center space-x-2 py-2 px-4 rounded-lg font-semibold transition-all bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
+                onClick={() => setIsOpenEditProfile(true)}>
                 <Pencil className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                 <span>Edit Profile</span>
               </button>
@@ -120,7 +139,7 @@ const Profile = () => {
                 onClick={handleUnfollow}
                 onMouseEnter={() => setIsHoveringUnfollow(true)}
                 onMouseLeave={() => setIsHoveringUnfollow(false)}
-                className="flex items-center space-x-2 py-2 px-4 rounded-lg font-semibold transition-all bg-red-500 text-white hover:bg-red-600"
+                className="flex items-center space-x-2 py-2 px-4 rounded-lg font-semibold transition-all bg-green-500 text-white hover:bg-red-600"
               >
                 {isHoveringUnfollow ? <UserRoundMinus className="w-5 h-5" /> : <UserRoundCheck className="w-5 h-5" />}
                 <span>{isHoveringUnfollow ? "Unfollow" : "Following"}</span>
@@ -199,6 +218,7 @@ const Profile = () => {
         onRequestClose={() => setIsOpenFollowers(false)}
         className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        ariaHideApp={false}
       >
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md transform transition-all scale-95">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Followers</h2>
@@ -218,6 +238,7 @@ const Profile = () => {
         onRequestClose={() => setIsOpenFollowing(false)}
         className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        ariaHideApp={false}
       >
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md transform transition-all scale-95">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Following</h2>
@@ -235,12 +256,24 @@ const Profile = () => {
       <ReactModal
         isOpen={isOpenEditProfile}
         onRequestClose={() => setIsOpenEditProfile(false)}
-        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4"
+        className="fixed inset-0 flex items-center justify-center p-4"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        ariaHideApp={false}
       >
-        <ProfileEditForm user={user} />
+        <div className="relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+          {/* Botón de cierre */}
+          <button
+            onClick={() => setIsOpenEditProfile(false)}
+            className="absolute top-3 right-3 text-gray-500 dark:text-gray-400 hover:text-red-500 transition"
+          >
+            <CircleX size={24} />
+          </button>
+
+          {/* Contenido del formulario */}
+          <ProfileEditForm user={user} refreshUser={refreshUser} setIsOpenEditProfile={setIsOpenEditProfile} />
+        </div>
       </ReactModal>
-    </Container>
+    </Container >
   );
 };
 

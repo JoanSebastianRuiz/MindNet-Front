@@ -7,7 +7,7 @@ import { useUser } from "@/context/UserContext";
 import { useState, useEffect } from "react";
 import ProgressCharacterBar from "@/components/common/ProgressCharacterBar";
 
-const PostForm = () => {
+const PostForm = ({fetchPosts}) => {
     const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
     const { user } = useUser();
     const [characters, setCharacters] = useState(0);
@@ -30,6 +30,7 @@ const PostForm = () => {
             const response = await axios.post("http://localhost:8080/api/posts", dataModified, { withCredentials: true });
             if (response.status === 200) {
                 console.log("Post created successfully");
+                fetchPosts();
                 reset();
             } else {
                 console.log("Error creating post else");

@@ -6,31 +6,27 @@ import { useState } from "react";
 import axios from "axios";
 import { useUser } from "@/context/UserContext";
 
-
 const SignInForm = () => {
-    const { register, handleSubmit, formState:{errors}, watch } = useForm();
+    const { register, handleSubmit, formState: { errors }, watch } = useForm();
     const router = useRouter();
     const [error, setError] = useState(null);
-    const { setUser } = useUser();
+    const { saveUser } = useUser();  // Ahora usa saveUser para guardar el usuario en sessionStorage
 
     const onSubmit = async (data) => {
+        setError(null); 
         try {
-            const respuesta = await axios.post("http://localhost:8080/auth/login", data, {withCredentials: true});
-            if (respuesta.status === 200) {
-                const user = await axios.get(`http://localhost:8080/api/users/username/${data.username}`, {withCredentials: true});
-                setUser(user.data);
-                console.log(user.data);
+            const response = await axios.post("http://localhost:8080/auth/login", data, { withCredentials: true });
+            if (response.status === 200) {
+                const userResponse = await axios.get(`http://localhost:8080/api/users/username/${data.username}`, { withCredentials: true });
+                saveUser(userResponse.data);  // Guardar usuario en contexto y sessionStorage
                 
                 router.push("/home");
             } else {
                 setError("Username or password incorrect");
             }
-
-        } catch (error) {
-            setError("Error logging in");
+        } catch (err) {
+            setError(err.response?.data?.message || "Error logging in");
         }
-
-
     };
 
     return (
@@ -45,9 +41,10 @@ const SignInForm = () => {
                 <input
                     id="username"
                     type="text"
-                    {...register("username")}
+                    {...register("username", { required: "Username is required" })}
                     className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
+                {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
             </div>
 
             <div>
@@ -57,10 +54,10 @@ const SignInForm = () => {
                 <input
                     id="password"
                     type="password"
-                    {...register("password")}
+                    {...register("password", { required: "Password is required" })}
                     className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
-                
+                {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
             </div>
 
             <button
@@ -70,9 +67,8 @@ const SignInForm = () => {
                 Sign In
             </button>
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </form>
-
     );
 };
 

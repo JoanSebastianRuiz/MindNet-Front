@@ -3,7 +3,7 @@ import ContainerBody from "./ContainerBody";
 
 const Container = ({ children }) => {
     return (
-        <main className="relative grid grid-cols-1 md:grid-cols-6 gap-4 p-4 md:p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
+        <main className="relative grid grid-cols-1 md:grid-cols-6 gap-4 p-4 md:p-6 bg-gray-100 dark:bg-gray-900 min-h-screen h-screen overflow-hidden">
             <NavBar />
             <ContainerBody>
                 {children}
