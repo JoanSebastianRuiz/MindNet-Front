@@ -1,4 +1,6 @@
 import "./globals.css";
+import { ThemeProvider } from "next-themes";
+import { UserContextProvider } from "@/context/UserContext";
 
 export const metadata = {
   title: "Create Next App",
@@ -7,8 +9,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <UserContextProvider>
+          <ThemeProvider attribute="class" defaultTheme="light">
+            {children}
+          </ThemeProvider>
+        </UserContextProvider>
+      </body>
     </html>
   );
 }

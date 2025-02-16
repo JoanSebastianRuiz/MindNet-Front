@@ -2,14 +2,35 @@
 
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import axios from "axios";
+import { useUser } from "@/context/UserContext";
+
 
 const SignInForm = () => {
-    const { register, handleSubmit } = useForm();
+    const { register, handleSubmit, formState:{errors}, watch } = useForm();
     const router = useRouter();
+    const [error, setError] = useState(null);
+    const { setUser } = useUser();
 
-    const onSubmit = (data) => {
-        console.log(data);
-        router.push("/home");
+    const onSubmit = async (data) => {
+        try {
+            const respuesta = await axios.post("http://localhost:8080/auth/login", data, {withCredentials: true});
+            if (respuesta.status === 200) {
+                const user = await axios.get(`http://localhost:8080/api/users/username/${data.username}`, {withCredentials: true});
+                setUser(user.data);
+                console.log(user.data);
+                
+                router.push("/home");
+            } else {
+                setError("Username or password incorrect");
+            }
+
+        } catch (error) {
+            setError("Error logging in");
+        }
+
+
     };
 
     return (
@@ -39,6 +60,7 @@ const SignInForm = () => {
                     {...register("password")}
                     className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
+                
             </div>
 
             <button
@@ -47,6 +69,8 @@ const SignInForm = () => {
             >
                 Sign In
             </button>
+
+            {error && <p className="text-red-500 text-sm">{error}</p>}
         </form>
 
     );

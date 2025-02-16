@@ -12,3 +12,40 @@ input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* Estilos generales para la barra de scroll */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+
+/* Color de fondo de la barra */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Modo claro */
+  border-radius: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1e1e1e; /* Modo oscuro */
+}
+
+/* Color y estilo del "thumb" (la parte que se arrastra) */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+  transition: background 0.3s;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+/* Cambia el color cuando pasas el mouse */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
