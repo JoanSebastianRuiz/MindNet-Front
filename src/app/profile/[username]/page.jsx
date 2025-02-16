@@ -3,7 +3,7 @@
 import Container from "@/components/containers/Container";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { User, UserRoundCheck, UserRoundPlus, UserRoundMinus, Pencil } from "lucide-react";
+import { User, UserRoundCheck, UserRoundPlus, UserRoundMinus, Pencil, Mail, Phone, Calendar } from "lucide-react";
 import axios from "axios";
 import Post from "@/components/common/Post";
 import ReactModal from "react-modal";
@@ -17,6 +17,7 @@ const Profile = () => {
   const [posts, setPosts] = useState(null);
   const [isOpenFollowers, setIsOpenFollowers] = useState(false);
   const [isOpenFollowing, setIsOpenFollowing] = useState(false);
+  const [isOpenEditProfile, setIsOpenEditProfile] = useState(false);
   const [userFollow, setUserFollow] = useState(false);
   const [isHoveringUnfollow, setIsHoveringUnfollow] = useState(false);
   const { user: currentUser } = useUser();
@@ -137,6 +138,41 @@ const Profile = () => {
         </div>
       </div>
 
+      {/* Informacion personal */}
+      <div className="mt-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white border-b pb-2 mb-4">
+          Personal Information
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Email */}
+          <div className="flex items-center space-x-4 border-l-4 border-blue-500 pl-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all p-3">
+            <Mail className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+            <div>
+              <h3 className="text-gray-700 dark:text-gray-300 font-semibold">Email</h3>
+              <p className="text-gray-500 dark:text-gray-400">{user.email}</p>
+            </div>
+          </div>
+
+          {/* Cellphone */}
+          <div className="flex items-center space-x-4 border-l-4 border-green-500 pl-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all p-3">
+            <Phone className="w-6 h-6 text-green-500 dark:text-green-400" />
+            <div>
+              <h3 className="text-gray-700 dark:text-gray-300 font-semibold">Cellphone</h3>
+              <p className="text-gray-500 dark:text-gray-400">{user.cellphone}</p>
+            </div>
+          </div>
+
+          {/* Birthday */}
+          <div className="flex items-center space-x-4 border-l-4 border-purple-500 pl-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all p-3">
+            <Calendar className="w-6 h-6 text-purple-500 dark:text-purple-400" />
+            <div>
+              <h3 className="text-gray-700 dark:text-gray-300 font-semibold">Birthday</h3>
+              <p className="text-gray-500 dark:text-gray-400">{user.birthday}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Biografía */}
       <div className="mt-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Biography</h2>
@@ -197,8 +233,8 @@ const Profile = () => {
 
       {/* Modal de editar perfil */}
       <ReactModal
-        isOpen={false}
-        onRequestClose={() => { }}
+        isOpen={isOpenEditProfile}
+        onRequestClose={() => setIsOpenEditProfile(false)}
         className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50"
       >
