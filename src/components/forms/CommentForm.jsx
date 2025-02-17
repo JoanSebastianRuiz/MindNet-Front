@@ -5,9 +5,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import ProgressCharacterBar from "@/components/common/ProgressCharacterBar";
 
-const CommentForm = ({ post }) => {
+const CommentForm = ({ post, fetchPosts }) => {
     const { register, handleSubmit, reset, formState: { errors }, watch } = useForm();
-    const { idUser, id } = post;
+    const { username, id } = post;
     const [characters, setCharacters] = useState(0);
     const maxLength = 200;
 
@@ -16,13 +16,14 @@ const CommentForm = ({ post }) => {
             const now = new Date();
             const dataModified = {
                 ...data,
-                post: { id },
-                user: { id: idUser },
+                idPost: id,
+                username: username,
                 datetime: now.toISOString()
             };
             const response = await axios.post("http://localhost:8080/api/comments", dataModified, { withCredentials: true });
             if (response.status === 200) {
                 console.log(response.data);
+                fetchPosts();
                 reset();
             } else {
                 console.log(response.data);

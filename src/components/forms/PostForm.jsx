@@ -22,7 +22,7 @@ const PostForm = ({fetchPosts}) => {
         const dataModified = {
             ...data,
             imageUrl: data.imageUrl || null,
-            user: { id: user.id },
+            username: user.username,
             datetime: now.toISOString()
         };
 

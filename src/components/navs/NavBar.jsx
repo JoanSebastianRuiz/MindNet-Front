@@ -8,14 +8,13 @@ import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/common/ThemeToggle";
 
 const NavBar = () => {
-    const { user, logout: logoutSession } = useUser();
+    const { user } = useUser();
     const router = useRouter();
 
     const logout = async () => {
         try {
             const respuesta = await axios.post("http://localhost:8080/auth/logout", {}, { withCredentials: true });
             if (respuesta.status === 200) {
-                logoutSession();
                 router.push("/");
             }
         } catch {

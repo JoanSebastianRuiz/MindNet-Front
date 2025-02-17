@@ -9,28 +9,14 @@ import ReactModal from "react-modal";
 import PostEditForm from "@/components/modals/PostEditForm";
 import CommentForm from "@/components/forms/CommentForm";
 import { useRouter } from "next/navigation";
+import highlightTags from "@/util/text/highlightTags";
 
-const Post = ({ post }) => {
-  const [comments, setComments] = useState(null);
+const Post = ({ post, fetchPosts }) => {
   const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/api/comments/post/${post.id}`,
-          { withCredentials: true }
-        );
-        setComments(response.data);
-        console.log(response.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchComments();
-  }, []);
 
   const deleteHandle = async () => {
     try {
@@ -42,6 +28,38 @@ const Post = ({ post }) => {
       console.error(error);
     }
   };
+
+  const fetchIsLiked = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/posts/${post.id}/is-liked`, {
+        params: { idUser: user.id },
+        withCredentials: true,
+      });
+      setIsLiked(response.data);
+    } catch (error) {
+      console.error("Error al obtener el estado de like:", error);
+    }
+  };
+
+  const handleLike = async () => {
+    try {
+      const response = await axios.put(`http://localhost:8080/api/posts/${post.id}/like`,
+        { idUser: user.id },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        setIsLiked(!isLiked);
+        post.likesCount = isLiked ? post.likesCount - 1 : post.likesCount + 1;
+      }
+    } catch (error) {
+      console.error("Error al dar like:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIsLiked();
+  }, [post.id, user.id]);
 
   return (
     <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 rounded-2xl shadow-lg space-y-5 max-w-lg w-full mx-auto border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
@@ -65,9 +83,9 @@ const Post = ({ post }) => {
         </div>
       </div>
 
-      {/* Post Content con palabras que no se salen del contenedor */}
+      {/* Body */}
       <p className="text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere">
-        {post.body}
+        {highlightTags(post.body)}
       </p>
       <p className="text-xs text-gray-500 dark:text-gray-400">
         {new Date(post.datetime).toLocaleString("en-GB", {
@@ -82,13 +100,14 @@ const Post = ({ post }) => {
 
       {/* Action Buttons */}
       <div className="flex items-center gap-6 mt-3">
-        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-500 transition-colors">
-          <Heart className="w-5 h-5" />
-          <span>{post.likesCount > 0 ? `${post.likesCount} likes` : "Like"}</span>
+        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-500 transition-colors"
+          onClick={handleLike}>
+          <Heart className={`w-5 h-5 ${isLiked ? "text-red-500" : ""}`} />
+          <span>{post.likesCount > 0 ? `${post.likesCount}` : ""}</span>
         </button>
         <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-500 transition-colors">
           <MessageCircle className="w-5 h-5" />
-          <span>{post.commentsCount > 0 ? `${post.commentsCount} comments` : "Comment"}</span>
+          <span>{post.comments.length > 0 ? `${post.comments.length}` : ""}</span>
         </button>
 
         {/* Edit and Delete Buttons */}
@@ -109,7 +128,16 @@ const Post = ({ post }) => {
           </div>
         )}
       </div>
-      <CommentForm post={post} />
+      <CommentForm post={post} fetchPosts={fetchPosts} />
+
+      {/* Comments Section */}
+      {post.comments && post.comments.length > 0 && (
+        <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+          {post.comments.map((comment) => (
+            <Comment key={comment.id} comment={comment} />
+          ))}
+        </div>
+      )}
 
       {/* Edit Modal */}
       <ReactModal
@@ -120,15 +148,6 @@ const Post = ({ post }) => {
       >
         <PostEditForm post={post} setIsOpen={setIsOpen} />
       </ReactModal>
-
-      {/* Comments Section */}
-      {comments && comments.length > 0 && (
-        <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-          {comments.map((comment) => (
-            <Comment key={comment.id} comment={comment} />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
