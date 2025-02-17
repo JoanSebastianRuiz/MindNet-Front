@@ -9,7 +9,7 @@ import ReactModal from "react-modal";
 import PostEditForm from "@/components/modals/PostEditForm";
 import CommentForm from "@/components/forms/CommentForm";
 import { useRouter } from "next/navigation";
-import highlightTags from "@/util/text/highlightTags";
+import HighlightText from "@/components/common/HighlightText"
 
 const Post = ({ post, fetchPosts }) => {
   const { user } = useUser();
@@ -85,7 +85,7 @@ const Post = ({ post, fetchPosts }) => {
 
       {/* Body */}
       <p className="text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere">
-        {highlightTags(post.body)}
+        {<HighlightText text={post.body} mentionedUsers={post.mentionedUsers}  />}
       </p>
       <p className="text-xs text-gray-500 dark:text-gray-400">
         {new Date(post.datetime).toLocaleString("en-GB", {

@@ -1,5 +1,5 @@
 import { UserIcon } from "lucide-react";
-import highlightTags from "@/util/text/highlightTags";
+import HighlightText from "@/components/common/HighlightText"
 
 const Comment = ({ comment }) => {
     return (
@@ -20,11 +20,11 @@ const Comment = ({ comment }) => {
                 </div>
             </div>
             <p className="text-gray-700 dark:text-gray-300 text-sm break-words overflow-hidden">
-                {highlightTags(comment.body)}
+                {<HighlightText text={comment.body} mentionedUsers={comment.mentionedUsers}  />}
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500">
                 {new Date(comment.datetime).toLocaleString('en-GB', {
-                    year: 'numeric', month: '2-digit', day: '2-digit', 
+                    year: 'numeric', month: '2-digit', day: '2-digit',
                     hour: '2-digit', minute: '2-digit', hour12: false
                 })}
             </p>
