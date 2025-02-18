@@ -7,7 +7,6 @@ const HighlightText = ({ text, mentionedUsers = [] }) => {
   if (typeof text !== "string") return null;
 
   const mentionedUsernames = new Set(mentionedUsers.map(user => user.username));
-  console.log(mentionedUsernames);
   const regex = /(@[\w.-]+|#[\w]+)/g; // Captura menciones (@usuario) y hashtags (#etiqueta)
 
   let lastIndex = 0;

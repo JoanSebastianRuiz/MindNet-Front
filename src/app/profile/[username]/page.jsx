@@ -205,7 +205,7 @@ const Profile = () => {
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Posts</h2>
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts && posts.length > 0 ? (
-            posts.map((post) => <Post key={post.id} post={post} />)
+            posts.map((post) => <Post key={post.id} post={post} refreshUser={refreshUser} user={currentUser} />)
           ) : (
             <p className="text-gray-400 italic text-center">No posts available</p>
           )}

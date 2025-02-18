@@ -4,18 +4,17 @@ import { Heart, MessageCircle, UserIcon, Trash2, Pencil } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Comment from "@/components/common/Comment";
-import { useUser } from "@/context/UserContext";
 import ReactModal from "react-modal";
 import PostEditForm from "@/components/modals/PostEditForm";
 import CommentForm from "@/components/forms/CommentForm";
 import { useRouter } from "next/navigation";
 import HighlightText from "@/components/common/HighlightText"
 
-const Post = ({ post, fetchPosts }) => {
-  const { user } = useUser();
+const Post = ({ post, fetchPosts, refreshUser, user }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const router = useRouter();
+  
 
 
   const deleteHandle = async () => {
@@ -23,6 +22,13 @@ const Post = ({ post, fetchPosts }) => {
       await axios.delete(`http://localhost:8080/api/posts/${post.id}`, {
         withCredentials: true,
       });
+      if (fetchPosts) {
+        fetchPosts();
+      }
+      if (refreshUser) {
+        refreshUser();
+      }
+
       console.log("Post eliminado correctamente");
     } catch (error) {
       console.error(error);
@@ -31,6 +37,7 @@ const Post = ({ post, fetchPosts }) => {
 
   const fetchIsLiked = async () => {
     try {
+      console.log(user);
       const response = await axios.get(`http://localhost:8080/api/posts/${post.id}/is-liked`, {
         params: { idUser: user.id },
         withCredentials: true,
@@ -42,15 +49,23 @@ const Post = ({ post, fetchPosts }) => {
   };
 
   const handleLike = async () => {
+    if (!user || !user.id) {
+      console.log("Usuario no autenticado");
+      return;
+    }
+
     try {
-      const response = await axios.put(`http://localhost:8080/api/posts/${post.id}/like`,
+      const response = await axios.put(
+        `http://localhost:8080/api/posts/${post.id}/like`,
         { idUser: user.id },
         { withCredentials: true }
       );
 
       if (response.status === 200) {
-        setIsLiked(!isLiked);
-        post.likesCount = isLiked ? post.likesCount - 1 : post.likesCount + 1;
+        // Actualizar likesCount basado en el estado anterior de isLiked
+        const newIsLiked = !isLiked;
+        setIsLiked(newIsLiked); // Cambiar el estado de like
+        post.likesCount = newIsLiked ? post.likesCount + 1 : post.likesCount - 1;
       }
     } catch (error) {
       console.error("Error al dar like:", error);
@@ -58,8 +73,14 @@ const Post = ({ post, fetchPosts }) => {
   };
 
   useEffect(() => {
-    fetchIsLiked();
-  }, [post.id, user.id]);
+    if (user && user.id) {
+      fetchIsLiked();
+    }
+  }, [user]);
+
+  if (!user) {
+    return <p>Loading post...</p>;
+  }
 
   return (
     <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 rounded-2xl shadow-lg space-y-5 max-w-lg w-full mx-auto border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
@@ -85,7 +106,7 @@ const Post = ({ post, fetchPosts }) => {
 
       {/* Body */}
       <p className="text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere">
-        {<HighlightText text={post.body} mentionedUsers={post.mentionedUsers}  />}
+        {<HighlightText text={post.body} mentionedUsers={post.mentionedUsers} />}
       </p>
       <p className="text-xs text-gray-500 dark:text-gray-400">
         {new Date(post.datetime).toLocaleString("en-GB", {
@@ -143,10 +164,11 @@ const Post = ({ post, fetchPosts }) => {
       <ReactModal
         isOpen={isOpen}
         onRequestClose={() => setIsOpen(false)}
+        ariaHideApp={false}
         className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-auto transform transition-all duration-300 scale-100 border border-gray-300 dark:border-gray-700"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300"
       >
-        <PostEditForm post={post} setIsOpen={setIsOpen} />
+        <PostEditForm post={post} setIsOpen={setIsOpen} fetchPosts={fetchPosts} refreshUser={refreshUser} />
       </ReactModal>
     </div>
   );

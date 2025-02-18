@@ -63,9 +63,6 @@ const NavBar = () => {
                 <Link href={`/profile/${user.username}`} className="text-xl hover:text-blue-500 transition">
                     <User className="w-6 h-6" />
                 </Link>
-                <Link href="/signup" className="text-xl hover:text-blue-500 transition">
-                    <Bell className="w-6 h-6" />
-                </Link>
                 <button onClick={logout} className="text-xl text-gray-700 dark:text-gray-300 hover:text-red-500 transition" aria-label="Logout">
                     <LogOut className="w-6 h-6" />
                 </button>

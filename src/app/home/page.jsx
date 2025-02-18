@@ -1,31 +1,18 @@
-"use client";
+"use client"; 
 import { useEffect, useState } from "react";
 import axios from "axios";
 import PostForm from "@/components/forms/PostForm";
 import Container from "@/components/containers/Container";
 import Post from "@/components/common/Post";
 import { useUser } from "@/context/UserContext";
-import { Globe, Users, Flame, Sparkles, Sun, Moon } from "lucide-react";
+import { Globe, Users, Flame, Sparkles } from "lucide-react";
 
 const Home = () => {
     const [posts, setPosts] = useState(null);
     const [filter, setFilter] = useState("trending");
     const [scope, setScope] = useState("all");
-    const { user } = useUser();
-    const [darkMode, setDarkMode] = useState(
-        typeof window !== "undefined" && localStorage.getItem("theme") === "dark"
-    );
-
-    useEffect(() => {
-        if (darkMode) {
-            document.documentElement.classList.add("dark");
-            localStorage.setItem("theme", "dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-            localStorage.setItem("theme", "light");
-        }
-    }, [darkMode]);
-
+    const { user, isLoading } = useUser(); 
+    
     const fetchPosts = async () => {
         if (user?.id) {
             try {
@@ -42,10 +29,18 @@ const Home = () => {
     };
 
     useEffect(() => {
-        if (user?.id) {
+        if (!isLoading && user?.id) { // Asegúrate de que el `user` esté cargado antes de hacer la solicitud
             fetchPosts();
         }
-    }, [filter, scope, user]);
+    }, [filter, scope, user, isLoading]);
+
+    if (isLoading) {
+        return <p>Loading user...</p>; // Asegúrate de mostrar algo mientras el `user` se carga
+    }
+
+    if (!user) {
+        return <p>User not found.</p>; 
+    }
 
     return (
         <Container className="space-y-6 p-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg transition-all">
@@ -112,6 +107,7 @@ const Home = () => {
                                 key={post.id}
                                 post={post}
                                 fetchPosts={fetchPosts}
+                                user={user}
                                 className="rounded-lg border border-gray-200 dark:border-gray-700 shadow-md transition-transform hover:scale-105 bg-white dark:bg-gray-800"
                             />
                         ))

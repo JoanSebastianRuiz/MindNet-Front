@@ -7,7 +7,7 @@ import { useUser } from "@/context/UserContext";
 import { useEffect, useState } from "react";
 import { CircleX } from "lucide-react";
 
-const PostEditForm = ({ post, setIsOpen }) => {
+const PostEditForm = ({ post, setIsOpen, fetchPosts, refreshUser }) => {
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset, setValue } = useForm();
   const { user } = useUser();
   const { id, body, imageUrl } = post;
@@ -29,6 +29,12 @@ const PostEditForm = ({ post, setIsOpen }) => {
       if (response.status === 200) {
         console.log("Post updated successfully");
         reset();
+        if (refreshUser) {
+          refreshUser();
+        }
+        if(fetchPosts) {
+          fetchPosts();
+        }
         setIsOpen(false);
       } else {
         console.log("Error updating post");
@@ -70,8 +76,10 @@ const PostEditForm = ({ post, setIsOpen }) => {
           type="url"
           placeholder="Image URL (optional)"
           {...register("imageUrl", {
-            required: "Image URL is required",
             validate: (value) => {
+              if (!value) {
+                return true;
+              }
               if (!isValidImageUrl(value)) {
                 return "Invalid URL";
               }
