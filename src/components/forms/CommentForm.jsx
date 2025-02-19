@@ -4,12 +4,14 @@ import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ProgressCharacterBar from "@/components/common/ProgressCharacterBar";
+import { useUser } from "@/context/UserContext";
 
 const CommentForm = ({ post, fetchPosts }) => {
     const { register, handleSubmit, reset, formState: { errors }, watch } = useForm();
-    const { username, id } = post;
+    const { id } = post;
     const [characters, setCharacters] = useState(0);
     const maxLength = 200;
+    const { user } = useUser();
 
     const onSubmit = async (data) => {
         try {
@@ -17,7 +19,7 @@ const CommentForm = ({ post, fetchPosts }) => {
             const dataModified = {
                 ...data,
                 idPost: id,
-                username: username,
+                username: user.username,
                 datetime: now.toISOString()
             };
             const response = await axios.post("http://localhost:8080/api/comments", dataModified, { withCredentials: true });

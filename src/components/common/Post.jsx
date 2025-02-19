@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { Heart, MessageCircle, UserIcon, Trash2, Pencil } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -8,14 +8,14 @@ import ReactModal from "react-modal";
 import PostEditForm from "@/components/modals/PostEditForm";
 import CommentForm from "@/components/forms/CommentForm";
 import { useRouter } from "next/navigation";
-import HighlightText from "@/components/common/HighlightText"
+import HighlightText from "@/components/common/HighlightText";
 
 const Post = ({ post, fetchPosts, refreshUser, user }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const router = useRouter();
-  
-
 
   const deleteHandle = async () => {
     try {
@@ -37,7 +37,6 @@ const Post = ({ post, fetchPosts, refreshUser, user }) => {
 
   const fetchIsLiked = async () => {
     try {
-      console.log(user);
       const response = await axios.get(`http://localhost:8080/api/posts/${post.id}/is-liked`, {
         params: { idUser: user.id },
         withCredentials: true,
@@ -90,10 +89,12 @@ const Post = ({ post, fetchPosts, refreshUser, user }) => {
           <img
             src={post.imageUrlUser}
             alt="Profile"
-            className="w-12 h-12 rounded-full object-cover border border-gray-300 shadow-sm"
+            className="w-12 h-12 aspect-square rounded-full object-cover border border-gray-300 shadow-sm"
           />
         ) : (
-          <UserIcon className="w-12 h-12 text-gray-400 bg-gray-200 rounded-full p-2" />
+          <div className="w-12 h-12 aspect-square flex items-center justify-center rounded-full border border-gray-300 bg-gray-200 dark:bg-gray-700 shadow-sm">
+            <UserIcon className="w-2/3 h-2/3 text-gray-400" />
+          </div>
         )}
         <div>
           <button
@@ -108,15 +109,21 @@ const Post = ({ post, fetchPosts, refreshUser, user }) => {
       <p className="text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-wrap-anywhere">
         {<HighlightText text={post.body} mentionedUsers={post.mentionedUsers} />}
       </p>
+
+      {/* Image */}
+      {post.imageUrl && (
+        <img
+          src={post.imageUrl}
+          alt="Post"
+          className="w-full h-64 object-cover rounded-lg shadow-md"
+        />
+      )}
+
       <p className="text-xs text-gray-500 dark:text-gray-400">
-        {new Date(post.datetime).toLocaleString("en-GB", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })}
+        {new Date(post.datetime).toLocaleString('en-GB', {
+                    year: 'numeric', month: 'short', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                })}
       </p>
 
       {/* Action Buttons */}
@@ -149,10 +156,35 @@ const Post = ({ post, fetchPosts, refreshUser, user }) => {
           </div>
         )}
       </div>
-      <CommentForm post={post} fetchPosts={fetchPosts} />
+
+
+
+      <div className="flex justify-between">
+        {/* Button to toggle comment form */}
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="text-blue-500 hover:text-blue-600 transition-colors mt-4"
+        >
+          {showForm ? "Hide Reply" : "Reply"}
+        </button>
+
+
+        {/* Button to toggle comments visibility */}
+        {post.comments.length > 0 && (
+          <button
+            onClick={() => setShowComments(!showComments)}
+            className="text-blue-500 hover:text-blue-600 transition-colors mt-4"
+          >
+            {showComments ? "Hide Comments" : "Show Comments"}
+          </button>
+        )}
+
+      </div>
+
+      {showForm && <CommentForm post={post} fetchPosts={fetchPosts} />}
 
       {/* Comments Section */}
-      {post.comments && post.comments.length > 0 && (
+      {showComments && post.comments && post.comments.length > 0 && (
         <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
           {post.comments.map((comment) => (
             <Comment key={comment.id} comment={comment} />
@@ -160,16 +192,16 @@ const Post = ({ post, fetchPosts, refreshUser, user }) => {
         </div>
       )}
 
-      {/* Edit Modal */}
       <ReactModal
         isOpen={isOpen}
         onRequestClose={() => setIsOpen(false)}
         ariaHideApp={false}
-        className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-auto transform transition-all duration-300 scale-100 border border-gray-300 dark:border-gray-700"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300"
+        className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl w-[90%] sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto transform transition-all duration-300 ease-out scale-100 border border-gray-300 dark:border-gray-700"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300 ease-out"
       >
         <PostEditForm post={post} setIsOpen={setIsOpen} fetchPosts={fetchPosts} refreshUser={refreshUser} />
       </ReactModal>
+
     </div>
   );
 };

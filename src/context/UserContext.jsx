@@ -6,6 +6,7 @@ const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [notificationsCount, setNotificationsCount] = useState(0);
 
     // Recuperar el usuario almacenado en sessionStorage al cargar la app
     useEffect(() => {
@@ -28,7 +29,7 @@ export const UserContextProvider = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ user, saveUser, logout }}>
+        <UserContext.Provider value={{ user, saveUser, logout, notificationsCount, setNotificationsCount }}>
             {children}
         </UserContext.Provider>
     );

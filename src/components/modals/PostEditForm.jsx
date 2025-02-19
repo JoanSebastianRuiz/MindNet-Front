@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { isValidImageUrl, isImageUrlAccessible } from "@/util/validators/validators";
 import axios from "axios";
 import { useUser } from "@/context/UserContext";
 import { useEffect, useState } from "react";
@@ -32,7 +31,7 @@ const PostEditForm = ({ post, setIsOpen, fetchPosts, refreshUser }) => {
         if (refreshUser) {
           refreshUser();
         }
-        if(fetchPosts) {
+        if (fetchPosts) {
           fetchPosts();
         }
         setIsOpen(false);
@@ -45,16 +44,16 @@ const PostEditForm = ({ post, setIsOpen, fetchPosts, refreshUser }) => {
   };
 
   return (
-    <div className="relative bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded-xl shadow-lg w-full max-w-md mx-auto">
+    <div className="relative bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 md:p-6 rounded-xl shadow-lg w-[90%] max-w-md mx-auto">
       {/* Botón de cerrar */}
       <button
         onClick={() => setIsOpen(false)}
-        className="absolute top-3 right-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
+        className="absolute top-2 right-2 md:top-3 md:right-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
       >
         <CircleX className="w-6 h-6" />
       </button>
 
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 text-center mb-4">
+      <h2 className="text-lg md:text-xl font-semibold text-center mb-4">
         Edit Post
       </h2>
 
@@ -66,7 +65,7 @@ const PostEditForm = ({ post, setIsOpen, fetchPosts, refreshUser }) => {
             maxLength: { value: 500, message: "Max 500 characters" },
             minLength: { value: 5, message: "At least 5 characters" }
           })}
-          className="w-full h-28 p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+          className="w-full h-24 md:h-28 p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
           placeholder="What's on your mind?"
         />
         {errors.body && <p className="text-red-500 text-xs">{errors.body.message}</p>}
@@ -77,18 +76,8 @@ const PostEditForm = ({ post, setIsOpen, fetchPosts, refreshUser }) => {
           placeholder="Image URL (optional)"
           {...register("imageUrl", {
             validate: (value) => {
-              if (!value) {
-                return true;
-              }
-              if (!isValidImageUrl(value)) {
-                return "Invalid URL";
-              }
-              if (!isImageUrlAccessible(value)) {
-                return "Image is not accessible";
-              }
-              return true;
+              if (!value) return true;
             }
-
           })}
           className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
         />
@@ -97,13 +86,15 @@ const PostEditForm = ({ post, setIsOpen, fetchPosts, refreshUser }) => {
         {/* Botón de actualizar */}
         <button
           type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition flex items-center justify-center"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition flex items-center justify-center disabled:opacity-50"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Updating..." : "Update"}
         </button>
       </form>
     </div>
+
+
   );
 };
 

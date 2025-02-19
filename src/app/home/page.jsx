@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import PostForm from "@/components/forms/PostForm";
@@ -11,8 +11,8 @@ const Home = () => {
     const [posts, setPosts] = useState(null);
     const [filter, setFilter] = useState("trending");
     const [scope, setScope] = useState("all");
-    const { user, isLoading } = useUser(); 
-    
+    const { user, isLoading } = useUser();
+
     const fetchPosts = async () => {
         if (user?.id) {
             try {
@@ -39,27 +39,27 @@ const Home = () => {
     }
 
     if (!user) {
-        return <p>User not found.</p>; 
+        return <p>User not found.</p>;
     }
 
     return (
         <Container className="space-y-6 p-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg transition-all">
 
             {/* Formulario de publicación */}
-            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-md">
+            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-t-lg shadow-md">
                 <PostForm fetchPosts={fetchPosts} />
             </div>
 
-            {/* Barra de filtros */}
-            <div className="flex flex-wrap justify-between items-center bg-gray-100 dark:bg-gray-800 p-3 shadow-md">
-                <div className="flex gap-2">
+            {/* Barra de filtros responsive */}
+            <div className="flex flex-wrap justify-between items-center bg-gray-100 dark:bg-gray-800 p-3 shadow-md rounded-b-lg gap-2 sm:flex-nowrap">
+                {/* Contenedor de botones de filtros */}
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                     <button
                         onClick={() => setFilter("trending")}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-                            filter === "trending"
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${filter === "trending"
                                 ? "bg-blue-500 text-white font-semibold shadow-md"
                                 : "bg-gray-300 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600"
-                        }`}
+                            }`}
                     >
                         <Flame className="w-5 h-5" />
                         Trending
@@ -67,24 +67,23 @@ const Home = () => {
 
                     <button
                         onClick={() => setFilter("newest")}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-                            filter === "newest"
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${filter === "newest"
                                 ? "bg-blue-500 text-white font-semibold shadow-md"
                                 : "bg-gray-300 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600"
-                        }`}
+                            }`}
                     >
                         <Sparkles className="w-5 h-5" />
                         Newest
                     </button>
                 </div>
 
+                {/* Botón de cambio de scope */}
                 <button
                     onClick={() => setScope(scope === "all" ? "following" : "all")}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-                        scope === "all"
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${scope === "all"
                             ? "bg-green-500 text-white font-semibold shadow-md"
                             : "bg-orange-500 text-white font-semibold shadow-md"
-                    }`}
+                        }`}
                 >
                     {scope === "all" ? (
                         <>
@@ -98,8 +97,9 @@ const Home = () => {
                 </button>
             </div>
 
+
             {/* Lista de publicaciones */}
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <section className="grid grid-cols-1 gap-6 pb-16 pt-4 md:pb-4">
                 {posts ? (
                     posts.length > 0 ? (
                         posts.map((post) => (

@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form"
 import { useState, useEffect } from "react"
 import axios from "axios";
-import { isValidImageUrl, hasNoSpaces, isImageUrlAccessible } from "@/util/validators/validators";
 
 const ProfileEditForm = ({ user, refreshUser, setIsOpenEditProfile }) => {
     const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm();
@@ -109,23 +108,11 @@ const ProfileEditForm = ({ user, refreshUser, setIsOpenEditProfile }) => {
                 {...register("imageUrl", {
                     validate: (value) => {
                         if (!value) return true;
-                        if (!isValidImageUrl(value)) return "Invalid image URL";
-                        if (!isImageUrlAccessible(value)) return "Image URL is not accessible";
-                        return true;
                     },
                 })}
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             />
             {errors.imageUrl && <p className="text-red-500 text-xs mt-1">{errors.imageUrl.message}</p>}
-
-            {/* Vista previa de la imagen si la URL es válida */}
-            {watch("imageUrl") && isValidImageUrl(watch("imageUrl")) && isImageUrlAccessible(watch("imageUrl")) && (
-                <img
-                    src={watch("imageUrl")}
-                    alt="Profile Preview"
-                    className="mt-2 w-24 h-24 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600"
-                />
-            )}
 
 
             {/* Email */}

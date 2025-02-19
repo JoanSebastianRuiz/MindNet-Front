@@ -1,7 +1,6 @@
 "use client"
 
 import { useForm } from "react-hook-form";
-import { isValidImageUrl, isImageUrlAccessible } from "@/util/validators/validators";
 import axios from "axios";
 import { useUser } from "@/context/UserContext";
 import { useState, useEffect } from "react";
@@ -64,9 +63,6 @@ const PostForm = ({fetchPosts}) => {
                 {...register("imageUrl", {
                     validate: (value) => {
                         if (!value) return true;
-                        if (!isValidImageUrl(value)) return "Invalid image URL";
-                        if (!isImageUrlAccessible(value)) return "Image not accessible";
-                        return true;
                     }
                 })}
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700"
