@@ -34,7 +34,8 @@ const SignUpForm = () => {
 
             if (response.status === 200) {
                 console.log("Usuario registrado correctamente");
-                saveUser(userData);
+                const userRegister = await axios.get(`http://localhost:8080/api/users/username/${data.username.toLowerCase()}`, { withCredentials: true })
+                saveUser(userRegister.data);
                 router.push("/home");
             } else {
                 setError("Error registering user");
